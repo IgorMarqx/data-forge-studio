@@ -10,6 +10,7 @@ import (
 	"data-forge-studio/backend/models"
 	"data-forge-studio/backend/repositories"
 	"data-forge-studio/backend/services"
+
 	"gorm.io/gorm"
 )
 
@@ -19,6 +20,7 @@ type App struct {
 	db                    *gorm.DB
 	dbStatus              database.Status
 	connectionsController *controllers.ConnectionsController
+	driversController     *controllers.DriversController
 }
 
 // NewApp creates a new App application struct
@@ -48,10 +50,15 @@ func (a *App) shutdown(ctx context.Context) {
 }
 
 func (a *App) connectProjectDatabase(ctx context.Context) {
+	if err := database.LoadEnvFile(".env"); err != nil {
+		println("Erro ao carregar .env:", err.Error())
+	}
+
 	config := database.MySQLConfigFromEnv()
 
 	db, err := database.OpenGORM(ctx, config)
 	if err != nil {
+		println("Erro ao conectar no MySQL:", err.Error())
 		a.dbStatus = database.Status{
 			Connected: false,
 			Message:   err.Error(),
@@ -87,8 +94,35 @@ func (a *App) CreateConnection(input models.CreateConnectionInput) (models.Conne
 	return a.connectionsController.Create(a.ctx, input)
 }
 
+func (a *App) UpdateConnection(input models.UpdateConnectionInput) (models.Connection, error) {
+	if a.connectionsController == nil {
+		return models.Connection{}, errors.New("backend não inicializado: conexão MySQL indisponível")
+	}
+
+	return a.connectionsController.Update(a.ctx, input)
+}
+
+func (a *App) GetDrivers() ([]models.Driver, error) {
+	if a.driversController == nil {
+		println("GetDrivers erro: driversController nil")
+		return nil, errors.New("backend não inicializado: conexão MySQL indisponível")
+	}
+
+	drivers, err := a.driversController.GetAllDrivers(a.ctx)
+	if err != nil {
+		println("GetDrivers erro:", err.Error())
+		return nil, err
+	}
+
+	return drivers, nil
+}
+
 func (a *App) bootstrapBackend(db *gorm.DB) {
 	connectionsRepository := repositories.NewConnectionsRepository(db)
 	connectionsService := services.NewConnectionsService(connectionsRepository)
 	a.connectionsController = controllers.NewConnectionsController(connectionsService)
+
+	driversRepository := repositories.NewDriversRepository(db)
+	driversService := services.NewDriversService(driversRepository)
+	a.driversController = controllers.NewDriversController(driversService)
 }
