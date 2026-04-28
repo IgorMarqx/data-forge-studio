@@ -1,0 +1,22 @@
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS connections (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    driver_id BIGINT UNSIGNED NOT NULL,
+    host VARCHAR(255) NOT NULL DEFAULT '',
+    port VARCHAR(20) NOT NULL DEFAULT '',
+    database_name VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL DEFAULT '',
+    password TEXT NOT NULL,
+    `ssl` BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_connections_driver
+        FOREIGN KEY (driver_id)
+        REFERENCES drivers (id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+-- +migrate Down
+DROP TABLE IF EXISTS connections;
