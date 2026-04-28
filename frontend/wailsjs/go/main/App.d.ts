@@ -7,6 +7,10 @@ export function CreateConnection(arg1:models.CreateConnectionInput):Promise<mode
 
 export function GetConnections():Promise<Array<models.Connection>>;
 
+export function GetDrivers():Promise<Array<models.Driver>>;
+
 export function GetProjectDatabaseStatus():Promise<database.Status>;
 
 export function Greet(arg1:string):Promise<string>;
+
+export function UpdateConnection(arg1:models.UpdateConnectionInput):Promise<models.Connection>;
