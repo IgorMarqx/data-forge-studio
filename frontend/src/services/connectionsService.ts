@@ -1,8 +1,25 @@
+import {CreateConnection, GetConnections, GetProjectDatabaseStatus} from '../../wailsjs/go/main/App';
+import type {database, models} from '../../wailsjs/go/models';
 import type {ConnectionForm} from '../types/ConnectionForm';
 
 export type SavedConnection = ConnectionForm & {
-    id: string;
+    id: string | number;
 };
+
+export type ProjectDatabaseStatus = database.Status;
+export type BackendConnection = models.Connection;
+
+export function getProjectDatabaseStatus(): Promise<ProjectDatabaseStatus> {
+    return GetProjectDatabaseStatus();
+}
+
+export function getConnections(): Promise<BackendConnection[]> {
+    return GetConnections();
+}
+
+export function createConnection(form: ConnectionForm): Promise<BackendConnection> {
+    return CreateConnection(form);
+}
 
 export async function testConnection(form: ConnectionForm): Promise<string> {
     await wait(250);
