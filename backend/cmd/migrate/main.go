@@ -66,6 +66,8 @@ func createMigration(name string) error {
 }
 
 func mustOpenDB() *sql.DB {
+	must(database.LoadEnvFile(".env"))
+
 	config := database.MySQLConfigFromEnv()
 	db, err := sql.Open("mysql", config.DSN())
 	must(err)
