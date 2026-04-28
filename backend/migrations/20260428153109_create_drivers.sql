@@ -1,0 +1,14 @@
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS drivers (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(40) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT INTO drivers (name)
+VALUES ('postgres'), ('mysql'), ('sqlite'), ('sqlserver')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- +migrate Down
+DROP TABLE IF EXISTS drivers;
