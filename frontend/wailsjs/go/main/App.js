@@ -10,10 +10,18 @@ export function GetConnections() {
   return window['go']['main']['App']['GetConnections']();
 }
 
+export function GetDrivers() {
+  return window['go']['main']['App']['GetDrivers']();
+}
+
 export function GetProjectDatabaseStatus() {
   return window['go']['main']['App']['GetProjectDatabaseStatus']();
 }
 
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function UpdateConnection(arg1) {
+  return window['go']['main']['App']['UpdateConnection'](arg1);
 }
