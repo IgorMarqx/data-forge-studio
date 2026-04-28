@@ -7,9 +7,13 @@ import (
 )
 
 type DriversService struct {
-	repositories *repositories.DriversRepository
+	repository *repositories.DriversRepository
+}
+
+func NewDriversService(repository *repositories.DriversRepository) *DriversService {
+	return &DriversService{repository: repository}
 }
 
 func (s *DriversService) GetAllDrivers(ctx context.Context) ([]models.Driver, error) {
-	return s.repositories.GetAllDrivers(ctx)
+	return s.repository.GetAllDrivers(ctx)
 }
