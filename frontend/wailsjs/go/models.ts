@@ -68,6 +68,7 @@ export namespace models {
 	    username: string;
 	    password: string;
 	    ssl: boolean;
+	    colorHex: string;
 	    // Go type: time
 	    createdAt: any;
 	    // Go type: time
@@ -89,6 +90,7 @@ export namespace models {
 	        this.username = source["username"];
 	        this.password = source["password"];
 	        this.ssl = source["ssl"];
+	        this.colorHex = source["colorHex"];
 	        this.createdAt = this.convertValues(source["createdAt"], null);
 	        this.updatedAt = this.convertValues(source["updatedAt"], null);
 	    }
@@ -120,6 +122,7 @@ export namespace models {
 	    username: string;
 	    password: string;
 	    ssl: boolean;
+	    colorHex: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new CreateConnectionInput(source);
@@ -135,8 +138,37 @@ export namespace models {
 	        this.username = source["username"];
 	        this.password = source["password"];
 	        this.ssl = source["ssl"];
+	        this.colorHex = source["colorHex"];
+	    }
+	}
+	
+	export class UpdateConnectionInput {
+	    id: number;
+	    name?: string;
+	    host?: string;
+	    port?: string;
+	    database?: string;
+	    username?: string;
+	    password?: string;
+	    ssl?: boolean;
+	    colorHex?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateConnectionInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.database = source["database"];
+	        this.username = source["username"];
+	        this.password = source["password"];
+	        this.ssl = source["ssl"];
+	        this.colorHex = source["colorHex"];
 	    }
 	}
 
 }
-
