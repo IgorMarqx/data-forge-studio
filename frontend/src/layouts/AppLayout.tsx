@@ -1,7 +1,7 @@
 import {NavLink, Outlet} from 'react-router-dom';
 
 const navItems = [
-    {to: '/connections', label: 'Conexões'},
+    {to: '/Root', label: 'Conexões'},
     {to: '/settings', label: 'Configurações'},
 ];
 
