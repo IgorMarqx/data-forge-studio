@@ -1,29 +1,29 @@
-import {createHashRouter} from 'react-router-dom';
-import {AppLayout} from '../layouts/AppLayout';
-import {Connection} from '../pages/Connections/Connection';
-import {Settings} from '../pages/Settings/Settings';
-import {Workspace} from '../pages/Workspace/Workspace';
+import { createHashRouter } from 'react-router-dom';
+import { AppLayout } from '../layouts/AppLayout';
+import { Settings } from '../pages/Settings/Settings';
+import { Workspace } from '../pages/Workspace/Workspace';
+import { Root } from '../pages/Root/Root';
 
 export const router = createHashRouter([
     {
         path: '/',
-        element: <AppLayout/>,
+        element: <AppLayout />,
         children: [
             {
                 index: true,
-                element: <Connection/>,
+                element: <Root />,
             },
             {
-                path: 'connections',
-                element: <Connection/>,
+                path: 'Root',
+                element: <Root />,
             },
             {
                 path: 'workspace/:connectionId',
-                element: <Workspace/>,
+                element: <Workspace />,
             },
             {
                 path: 'settings',
-                element: <Settings/>,
+                element: <Settings />,
             },
         ],
     },
