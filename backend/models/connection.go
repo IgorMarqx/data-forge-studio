@@ -13,6 +13,7 @@ type Connection struct {
 	Username  string    `gorm:"size:255;not null;default:''" json:"username"`
 	Password  string    `gorm:"type:text;not null" json:"password"`
 	SSL       bool      `gorm:"column:ssl;not null;default:false" json:"ssl"`
+	ColorHex  string    `gorm:"column:color_hex;size:7;not null;default:'#ec4899'" json:"colorHex"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -30,4 +31,17 @@ type CreateConnectionInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	SSL      bool   `json:"ssl"`
+	ColorHex string `json:"colorHex"`
+}
+
+type UpdateConnectionInput struct {
+	ID       uint    `json:"id"`
+	Name     *string `json:"name,omitempty"`
+	Host     *string `json:"host,omitempty"`
+	Port     *string `json:"port,omitempty"`
+	Database *string `json:"database,omitempty"`
+	Username *string `json:"username,omitempty"`
+	Password *string `json:"password,omitempty"`
+	SSL      *bool   `json:"ssl,omitempty"`
+	ColorHex *string `json:"colorHex,omitempty"`
 }
