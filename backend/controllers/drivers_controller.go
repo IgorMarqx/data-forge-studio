@@ -14,6 +14,6 @@ func NewDriversController(service *services.DriversService) *DriversController {
 	return &DriversController{service: service}
 }
 
-func (c *DriversController) GetALlDrivers(ctx context.Context) ([]models.Driver, error) {
+func (c *DriversController) GetAllDrivers(ctx context.Context) ([]models.Driver, error) {
 	return c.service.GetAllDrivers(ctx)
 }
