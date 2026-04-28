@@ -1,183 +1,141 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type {BackendConnection} from '../services/connectionsService';
+import { Check, Circle, Database, Server, SquareStack, Zap } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useGetDrivers } from '../hooks/Drivers/useGetDrivers';
+import type { BackendDriver } from '../services/driversService';
 
 type NewConnectionsProps = {
-    connections: BackendConnection[];
-    selectedConnectionId: string;
-    onSelectConnection: (connectionId: string) => void;
+    selectedDriverId?: string;
+    onSelectDriver?: (driver: BackendDriver) => void;
 };
 
 export function NewConnections({
-    connections,
-    selectedConnectionId,
-    onSelectConnection,
+    selectedDriverId,
+    onSelectDriver,
 }: NewConnectionsProps) {
-    const [isSelectOpen, setIsSelectOpen] = useState(false);
-    const [search, setSearch] = useState('');
-    const selectRef = useRef<HTMLDivElement>(null);
-
-    const selectedConnection = useMemo(
-        () => connections.find((connection) => String(connection.id) === selectedConnectionId),
-        [connections, selectedConnectionId],
-    );
-
-    const filteredConnections = useMemo(() => {
-        const normalizedSearch = search.trim().toLowerCase();
-
-        if (!normalizedSearch) {
-            return connections;
-        }
-
-        return connections.filter((connection) =>
-            [
-                connection.name,
-                connection.driver.name,
-                connection.database,
-                connection.host,
-                connection.port,
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase()
-                .includes(normalizedSearch),
-        );
-    }, [connections, search]);
+    const { drivers, loading, error, reload } = useGetDrivers();
+    const [localSelectedDriverId, setLocalSelectedDriverId] = useState(selectedDriverId ?? '');
 
     useEffect(() => {
-        function handlePointerDown(event: MouseEvent) {
-            if (!selectRef.current?.contains(event.target as Node)) {
-                setIsSelectOpen(false);
-                setSearch('');
-            }
+        if (selectedDriverId !== undefined) {
+            setLocalSelectedDriverId(selectedDriverId);
         }
+    }, [selectedDriverId]);
 
-        document.addEventListener('mousedown', handlePointerDown);
+    const activeDriverId = selectedDriverId ?? localSelectedDriverId;
+    const selectedDriver = useMemo(
+        () => drivers.find((driver) => String(driver.id) === activeDriverId),
+        [drivers, activeDriverId],
+    );
 
-        return () => document.removeEventListener('mousedown', handlePointerDown);
-    }, []);
+    function handleSelectDriver(driverId: string) {
+        const driver = drivers.find((item) => String(item.id) === driverId);
 
-    function handleSelectConnection(connectionId: string) {
-        onSelectConnection(connectionId);
-        setIsSelectOpen(false);
-        setSearch('');
+        setLocalSelectedDriverId(driverId);
+
+        if (driver) {
+            onSelectDriver?.(driver);
+        }
     }
 
     return (
-        <section className="min-h-0 overflow-y-auto p-6">
-            <div className="mx-auto max-w-2xl">
-                <div className="mb-6">
-                    <p className="text-xs uppercase tracking-wide text-cyan-400">Nova conexão</p>
-                    <h2 className="mt-1 text-2xl font-semibold text-zinc-50">
-                        Escolha uma conexão
-                    </h2>
-                </div>
+        <section className="min-h-0 border-r border-[#2b3140] bg-[#121722] px-4 py-6">
+            <div>
+                <p className="text-xs uppercase tracking-wide text-[#ff5a14]">Driver</p>
+                <h2 className="mt-3 text-sm font-semibold text-white">Selecione o driver</h2>
+            </div>
 
-                <div className="rounded border border-zinc-800 bg-zinc-950 p-5">
-                    <div className="relative" ref={selectRef}>
-                        <label className="mb-1.5 block text-sm font-medium text-zinc-300">Conexão</label>
+            <div className="mt-5 space-y-1.5">
+                {loading && (
+                    <p className="rounded border border-[#30384b] bg-[#1a2030] px-3 py-3 text-xs text-slate-400">
+                        Carregando drivers...
+                    </p>
+                )}
 
+                {error && (
+                    <div className="rounded border border-red-900/70 bg-red-950/40 px-3 py-2">
+                        <p className="text-xs text-red-200">{error}</p>
                         <button
-                            aria-expanded={isSelectOpen}
-                            aria-haspopup="listbox"
-                            className="flex h-10 w-full items-center justify-between rounded border border-zinc-700 bg-zinc-900 px-3 text-left text-sm text-zinc-100 outline-none transition hover:border-zinc-600 focus:border-cyan-500"
-                            onClick={() => setIsSelectOpen((current) => !current)}
+                            className="mt-2 text-xs font-medium text-red-100 underline decoration-red-400 underline-offset-4"
+                            onClick={reload}
                             type="button"
                         >
-                            <span className={selectedConnection ? 'text-zinc-100' : 'text-zinc-500'}>
-                                {selectedConnection?.name ?? 'Selecione uma conexão'}
-                            </span>
-                            <span
-                                aria-hidden="true"
-                                className={[
-                                    'ml-3 text-xs text-zinc-500 transition-transform',
-                                    isSelectOpen ? 'rotate-180' : '',
-                                ].join(' ')}
-                            >
-                                v
-                            </span>
+                            Tentar novamente
                         </button>
-
-                        {isSelectOpen && (
-                            <div className="absolute z-20 mt-1 w-full overflow-hidden rounded border border-zinc-700 bg-zinc-950 shadow-xl shadow-black/30">
-                                <div className="border-b border-zinc-800 p-2">
-                                    <input
-                                        autoFocus
-                                        className="h-9 w-full rounded border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-cyan-500"
-                                        onChange={(event) => setSearch(event.target.value)}
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Escape') {
-                                                setIsSelectOpen(false);
-                                                setSearch('');
-                                            }
-                                        }}
-                                        placeholder="Pesquisar conexão..."
-                                        value={search}
-                                    />
-                                </div>
-
-                                <div className="max-h-64 overflow-y-auto p-1" role="listbox">
-                                    {filteredConnections.length > 0 ? (
-                                        filteredConnections.map((connection) => {
-                                            const connectionId = String(connection.id);
-                                            const isSelected = connectionId === selectedConnectionId;
-
-                                            return (
-                                                <button
-                                                    aria-selected={isSelected}
-                                                    className={[
-                                                        'flex w-full items-start gap-3 rounded px-2.5 py-2 text-left text-sm outline-none transition',
-                                                        isSelected
-                                                            ? 'bg-cyan-950/60 text-cyan-100'
-                                                            : 'text-zinc-200 hover:bg-zinc-900 focus:bg-zinc-900',
-                                                    ].join(' ')}
-                                                    key={connection.id}
-                                                    onClick={() => handleSelectConnection(connectionId)}
-                                                    role="option"
-                                                    type="button"
-                                                >
-                                                    <span
-                                                        aria-hidden="true"
-                                                        className={[
-                                                            'mt-1 h-2 w-2 shrink-0 rounded-full',
-                                                            isSelected ? 'bg-cyan-400' : 'bg-zinc-700',
-                                                        ].join(' ')}
-                                                    />
-                                                    <span className="min-w-0">
-                                                        <span className="block font-medium">
-                                                            {connection.name}
-                                                        </span>
-                                                        <span className="mt-0.5 block truncate text-xs text-zinc-500">
-                                                            {connection.driver.name} · {connection.database}
-                                                        </span>
-                                                    </span>
-                                                </button>
-                                            );
-                                        })
-                                    ) : (
-                                        <p className="px-3 py-4 text-sm text-zinc-500">
-                                            Nenhuma conexão encontrada.
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
                     </div>
+                )}
 
-                    {selectedConnection && (
-                        <div className="mt-5 rounded border border-zinc-800 bg-zinc-900 p-4">
-                            <p className="text-sm font-medium text-zinc-100">{selectedConnection.name}</p>
-                            <p className="mt-1 text-sm text-zinc-400">
-                                {selectedConnection.driver.name} · {selectedConnection.database}
-                            </p>
-                            {selectedConnection.driver.name !== 'sqlite' && (
-                                <p className="mt-1 text-sm text-zinc-500">
-                                    {selectedConnection.host}:{selectedConnection.port}
-                                </p>
-                            )}
-                        </div>
-                    )}
-                </div>
+                {!loading && !error && drivers.length === 0 && (
+                    <p className="rounded border border-[#30384b] bg-[#1a2030] px-3 py-3 text-xs text-slate-400">
+                        Nenhum driver cadastrado.
+                    </p>
+                )}
+
+                {drivers.map((driver) => {
+                    const driverId = String(driver.id);
+                    const isSelected = selectedDriver?.id === driver.id;
+                    const meta = driverMeta(driver.name);
+
+                    return (
+                        <button
+                            className={[
+                                'flex h-[54px] w-full items-center gap-3 rounded border px-3 text-left transition cursor-pointer',
+                                isSelected
+                                    ? 'border-[#d9480b] bg-[#21100f]'
+                                    : 'border-[#30384b] bg-[#1a2030] hover:border-[#5b647a]',
+                            ].join(' ')}
+                            key={driver.id}
+                            onClick={() => handleSelectDriver(driverId)}
+                            type="button"
+                        >
+                            <span
+                                className="grid size-8 shrink-0 place-items-center rounded bg-[#293247] text-slate-200"
+                                aria-hidden="true"
+                            >
+                                <meta.Icon className="size-4" />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                                <span className="text-sm font-semibold text-white">{meta.label}</span>
+                                {meta.port && <span className="ml-2 text-xs text-slate-400">:{meta.port}</span>}
+                            </span>
+                            {isSelected && <Check className="size-4 text-[#ff5a14]" aria-hidden="true" />}
+                        </button>
+                    );
+                })}
             </div>
         </section>
     );
+}
+
+function driverMeta(name: string) {
+    const normalized = name.toLowerCase();
+
+    if (normalized === 'mysql') {
+        return { label: 'MySQL', port: '3306', Icon: Database };
+    }
+
+    if (normalized === 'postgres' || normalized === 'postgresql') {
+        return { label: 'PostgreSQL', port: '5432', Icon: Database };
+    }
+
+    if (normalized === 'sqlite') {
+        return { label: 'SQLite', port: '', Icon: SquareStack };
+    }
+
+    if (normalized === 'mongodb' || normalized === 'mongo') {
+        return { label: 'MongoDB', port: '27017', Icon: Server };
+    }
+
+    if (normalized === 'redis') {
+        return { label: 'Redis', port: '6379', Icon: Zap };
+    }
+
+    if (normalized === 'sqlserver') {
+        return { label: 'SQL Server', port: '1433', Icon: Database };
+    }
+
+    return {
+        label: name,
+        port: '',
+        Icon: Circle,
+    };
 }
