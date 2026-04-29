@@ -1,7 +1,8 @@
-import { Database, Settings, SquareTerminal } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Database, Maximize, Minimize, Minus, Settings, X } from 'lucide-react';
+import { type MouseEvent, useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { ConnectionsSummaryContext } from '../contexts/ConnectionsSummaryContext';
+import { Quit, WindowIsMaximised, WindowMinimise, WindowToggleMaximise } from '../../wailsjs/runtime/runtime';
 
 const navItems = [
     { to: '/Root', label: 'Conexões', Icon: Database },
@@ -10,14 +11,46 @@ const navItems = [
 
 export function AppLayout() {
     const [connectionCount, setConnectionCount] = useState(0);
+    const [isMaximised, setIsMaximised] = useState(false);
     const connectionsSummary = useMemo(
         () => ({ connectionCount, setConnectionCount }),
         [connectionCount],
     );
 
+    useEffect(() => {
+        void syncMaximisedState();
+    }, []);
+
+    async function syncMaximisedState() {
+        try {
+            setIsMaximised(await WindowIsMaximised());
+        } catch {
+            setIsMaximised(false);
+        }
+    }
+
+    function handleToggleMaximise() {
+        WindowToggleMaximise();
+        setIsMaximised((current) => !current);
+        window.setTimeout(() => void syncMaximisedState(), 100);
+    }
+
+    function handleTitleBarDoubleClick(event: MouseEvent<HTMLElement>) {
+        const target = event.target as HTMLElement;
+
+        if (target.closest('.app-no-drag')) {
+            return;
+        }
+
+        handleToggleMaximise();
+    }
+
     return (
         <div className="grid h-screen grid-rows-[40px_1fr_25px] bg-[#080b10] text-zinc-100">
-            <header className="grid grid-cols-[220px_1fr_220px] items-center border-b border-[#2b3140] bg-[#181e2d]">
+            <header
+                className="app-drag grid grid-cols-[220px_minmax(0,1fr)_auto_minmax(0,1fr)_132px] items-center border-b border-[#2b3140] bg-[#181e2d]"
+                onDoubleClick={handleTitleBarDoubleClick}
+            >
                 <div className="flex h-full items-center gap-2 px-2">
                     <div className="grid size-7 place-items-center rounded bg-[#d94a08] text-xs font-bold text-white">
                         DF
@@ -27,7 +60,9 @@ export function AppLayout() {
                     </span>
                 </div>
 
-                <nav className="flex h-full items-center justify-center gap-4">
+                <div className="h-full" aria-hidden="true" />
+
+                <nav className="app-no-drag flex h-full items-center justify-center gap-4">
                     {navItems.map(({ to, label, Icon }) => (
                         <NavLink
                             key={to}
@@ -47,8 +82,37 @@ export function AppLayout() {
                     ))}
                 </nav>
 
-                <div className="flex justify-end px-4 text-slate-500">
-                    <SquareTerminal className="size-4" aria-hidden="true" />
+                <div className="h-full" aria-hidden="true" />
+
+                <div className="app-no-drag flex h-full items-center justify-end">
+                    <button
+                        aria-label="Minimizar"
+                        className="grid h-full w-11 place-items-center text-slate-400 transition hover:bg-[#242d40] hover:text-white"
+                        onClick={WindowMinimise}
+                        type="button"
+                    >
+                        <Minus className="size-4" aria-hidden="true" />
+                    </button>
+                    <button
+                        aria-label={isMaximised ? 'Restaurar' : 'Maximizar'}
+                        className="grid h-full w-11 place-items-center text-slate-400 transition hover:bg-[#242d40] hover:text-white"
+                        onClick={handleToggleMaximise}
+                        type="button"
+                    >
+                        {isMaximised ? (
+                            <Minimize className="size-3.5" aria-hidden="true" />
+                        ) : (
+                            <Maximize className="size-3.5" aria-hidden="true" />
+                        )}
+                    </button>
+                    <button
+                        aria-label="Fechar"
+                        className="grid h-full w-11 place-items-center text-slate-400 transition hover:bg-[#c42b1c] hover:text-white"
+                        onClick={Quit}
+                        type="button"
+                    >
+                        <X className="size-4" aria-hidden="true" />
+                    </button>
                 </div>
             </header>
 
