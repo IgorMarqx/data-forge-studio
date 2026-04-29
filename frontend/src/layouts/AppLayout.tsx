@@ -3,6 +3,7 @@ import { type MouseEvent, useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { ConnectionsSummaryContext } from '../contexts/ConnectionsSummaryContext';
 import { Quit, WindowIsMaximised, WindowMinimise, WindowToggleMaximise } from '../../wailsjs/runtime/runtime';
+import dataForgeStudioLogo from '../assets/images/data-forge-studio-icon.png';
 
 const navItems = [
     { to: '/Root', label: 'Conexões', Icon: Database },
@@ -52,9 +53,12 @@ export function AppLayout() {
                 onDoubleClick={handleTitleBarDoubleClick}
             >
                 <div className="flex h-full items-center gap-2 px-2">
-                    <div className="grid size-7 place-items-center rounded bg-[#d94a08] text-xs font-bold text-white">
-                        DF
-                    </div>
+                    <img
+                        src={dataForgeStudioLogo}
+                        alt=""
+                        className="size-12 object-contain"
+                        aria-hidden="true"
+                    />
                     <span className="text-sm font-semibold text-white">
                         Data Forge Studio
                     </span>
