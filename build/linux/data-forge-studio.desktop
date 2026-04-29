@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Data Forge Studio
+Comment=Database workspace for data projects
+Exec=/home/igor/pessoal/data-forge-studio/build/bin/data-forge-studio-dev-linux-amd64
+Icon=data-forge-studio
+Terminal=false
+Categories=Development;Utility;
+StartupWMClass=data-forge-studio
